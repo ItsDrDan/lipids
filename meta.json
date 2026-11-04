@@ -1,0 +1,24 @@
+{
+  "title": "Lipid Lab — Lipids",
+  "author": "Dr. Dan (ItsDrDan)",
+  "course": "CHEM 3B",
+  "description": "Practice CHEM 3B lipids (Chapter 9) in six modes: Fatty Acid ID (saturation, shorthand, omega numbers, melting points, essential fatty acids from drawn chains), Build & Break (esterification, hydrolysis, saponification and hydrogenation of triacylglycerols), Lipid Line-up (classify triacylglycerols, phospholipids, sphingolipids, steroids, waxes and eicosanoids), Membranes & Transport (bilayers, diffusion, facilitated and active transport, surfactant), Lipids in the Clinic (lipoproteins, bile, fat-soluble vitamins, statins, NSAIDs), and Exam Practice (68 Final Boss lipid questions).",
+  "icon": "🧈",
+  "tags": [
+    "chemistry",
+    "CHEM 3B",
+    "biochemistry",
+    "lipids",
+    "fatty acids",
+    "triacylglycerols",
+    "saponification",
+    "phospholipids",
+    "steroids",
+    "cholesterol",
+    "membranes",
+    "lipoproteins"
+  ],
+  "version": "1",
+  "status": "working",
+  "logo": "logo.svg"
+}
