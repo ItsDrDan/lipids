@@ -424,6 +424,12 @@ function dbl(a, b, toward, o = {}) {
   return Ln(a, b, o) + Ln(p, q, o);
 }
 
+// double bond drawn symmetrically about the bond axis (for C=O ending in an atom label)
+function dblC(a, b, o = {}) {
+  const dx = b[0] - a[0], dy = b[1] - a[1], L = Math.hypot(dx, dy), nx = -dy / L * 2.8, ny = dx / L * 2.8;
+  return Ln([a[0] + nx, a[1] + ny], [b[0] + nx, b[1] + ny], o) + Ln([a[0] - nx, a[1] - ny], [b[0] - nx, b[1] - ny], o);
+}
+
 /* ---- chain layout: beam search over turn directions so cis bonds bend, trans bonds stay straight,
         single bonds prefer the zig-zag, and the chain never runs into itself ---- */
 const LAYOUT = {};
@@ -488,11 +494,11 @@ function faSVG(f, opts = {}) {
     } else g += Ln(pts[i], pts[i + 1], { c: col });
   }
   // carboxyl
-  g += dbl(pts[0], [pts[0][0] + (up[0] - pts[0][0]) * 0.62, pts[0][1] + (up[1] - pts[0][1]) * 0.62], pts[1], { off: 5 });
-  g += T(up[0], up[1] + 1, 'O', { a: 'middle' });
-  g += Ln(pts[0], [pts[0][0] + (dn[0] - pts[0][0]) * 0.72, pts[0][1] + (dn[1] - pts[0][1]) * 0.72]);
-  if (opts.salt) g += T(dn[0] + 4, dn[1] + 12, `O^- ${opts.salt}^+`, { a: 'end', raw: false });
-  else g += T(dn[0] + 4, dn[1] + 12, 'HO', { a: 'end' });
+  g += dblC(pts[0], [pts[0][0] + (up[0] - pts[0][0]) * 0.66, pts[0][1] + (up[1] - pts[0][1]) * 0.66]);
+  g += T(up[0], up[1] + 6, 'O', { a: 'middle' });
+  g += Ln(pts[0], [pts[0][0] + (dn[0] - pts[0][0]) * 0.66, pts[0][1] + (dn[1] - pts[0][1]) * 0.66]);
+  if (opts.salt) g += T(dn[0] + 6.5, dn[1] + 6, `${opts.salt}^+ ^-O`, { a: 'end' });
+  else g += T(dn[0] + 6.5, dn[1] + 6, 'HO', { a: 'end' });
   // numbers
   if (opts.num || opts.omega) pts.forEach((p, i) => {
     const show = opts.num ? (opts.numOnly ? opts.numOnly.includes(i) : true) : (opts.omegaOnly ? opts.omegaOnly.includes(i) : true);
@@ -504,7 +510,7 @@ function faSVG(f, opts = {}) {
     const vl2 = Math.hypot(vx, vy) || 1;
     g += T(p[0] + vx / vl2 * 15, p[1] + vy / vl2 * 15 + 5, lab, { a: 'middle', size: 11.5, fill: opts.omega ? '#7a4fd0' : '#5b6684', w: 800 });
   });
-  if (opts.subs) opts.subs.forEach(([i, lab]) => { const p = pts[i], a = pts[i - 1], b = pts[i + 1]; let vx = 2 * p[0] - a[0] - b[0], vy = 2 * p[1] - a[1] - b[1]; const vl = Math.hypot(vx, vy) || 1; vx /= vl; vy /= vl; g += Ln(p, [p[0] + vx * S * 0.7, p[1] + vy * S * 0.7]); g += T(p[0] + vx * S * 1.05, p[1] + vy * S * 1.05 + 6, lab, { a: 'middle' }); });
+  if (opts.subs) opts.subs.forEach(([i, lab]) => { const p = pts[i], a = pts[i - 1], b = pts[i + 1]; let vx = 2 * p[0] - a[0] - b[0], vy = 2 * p[1] - a[1] - b[1]; const vl = Math.hypot(vx, vy) || 1; vx /= vl; vy /= vl; g += Ln(p, [p[0] + vx * S * 0.66, p[1] + vy * S * 0.66]); g += T(p[0] + vx * S - 6.5, p[1] + vy * S + 6, lab, { a: 'start' }); });
   if (opts.hl) opts.hl.forEach(i => { const p = pts[i]; g += `<circle cx="${r1(p[0])}" cy="${r1(p[1])}" r="9" fill="${HI}" fill-opacity=".22" stroke="${HI}" stroke-width="2.2"/>`; });
   if (opts.tap) pts.forEach((p, i) => { g += `<circle class="atom" data-atom="${i}" cx="${r1(p[0])}" cy="${r1(p[1])}" r="11" tabindex="0" role="button" aria-label="carbon ${opts.tapLabels ? opts.tapLabels(i) : 'atom ' + (i + 1)}"/>`; });
   const label = opts.label || `Line structure of a ${n}-carbon fatty acid${opts.salt ? ' salt' : ''} with ${db.length} carbon–carbon double bond${db.length === 1 ? '' : 's'}`;
@@ -704,9 +710,9 @@ function steroidSVG(kind = 'cholesterol', o = {}) {
   bonds.forEach(b => {
     let p = P(b.a), q = P(b.b);
     if (lab.has(b.b)) q = [p[0] + (q[0] - p[0]) * 0.62, p[1] + (q[1] - p[1]) * 0.62];
-    g += b.d ? dbl(p, q, b.t ? P(b.t) : null) : Ln(p, q);
+    g += b.d ? (lab.has(b.b) ? dblC(p, q) : dbl(p, q, b.t ? P(b.t) : null)) : Ln(p, q);
   });
-  labels.forEach(([k, s, a]) => { const p = P(k); g += T(p[0] + (a === 'end' ? 8 : -6), p[1] + 6, s, { a }); });
+  labels.forEach(([k, s]) => { const p = P(k); g += s === 'O' ? T(p[0], p[1] + 6, s, { a: 'middle' }) : /^O/.test(s) ? T(p[0] - 6.5, p[1] + 6, s, { a: 'start' }) : T(p[0] + 6.5, p[1] + 6, s, { a: 'end' }); });
   return svgWrap((MX - mx) * S, (MY - my) * S, g, o.label || `Line structure of ${kind}: a steroid with four fused rings (three six-membered and one five-membered)`, 'art mol', ` style="max-width:${Math.round((MX - mx) * S * 1.2)}px"`);
 }
 
@@ -721,9 +727,9 @@ function skelSVG(atoms, bonds, labels, o = {}) {
     let p = P(a), q = P(b);
     if (lab.has(b)) q = [p[0] + (q[0] - p[0]) * 0.62, p[1] + (q[1] - p[1]) * 0.62];
     if (lab.has(a)) p = [q[0] + (p[0] - q[0]) * 0.62, q[1] + (p[1] - q[1]) * 0.62];
-    g += d === 2 ? dbl(p, q, t ? (atoms[t] ? P(t) : null) : null) : Ln(p, q);
+    g += d === 2 ? ((lab.has(b) || lab.has(a)) ? dblC(p, q) : dbl(p, q, t ? (atoms[t] ? P(t) : null) : null)) : Ln(p, q);
   });
-  labels.forEach(([k, s, a]) => { const p = P(k); g += T(p[0] + (a === 'end' ? 9 : a === 'middle' ? 0 : -3), p[1] + 6, s, { a: a || 'middle' }); });
+  labels.forEach(([k, s]) => { const p = P(k); g += s === 'O' ? T(p[0], p[1] + 6, s, { a: 'middle' }) : /^O/.test(s) ? T(p[0] - 6.5, p[1] + 6, s, { a: 'start' }) : T(p[0] + 6.5, p[1] + 6, s, { a: 'end' }); });
   return svgWrap((MX - mx) * S, (MY - my) * S, g, o.label || 'Line structure', 'art mol', ` style="max-width:${Math.round((MX - mx) * S * (o.zoom || 1.15))}px"`);
 }
 // zig-zag helper in unit coords: start point, list of headings (degrees)
