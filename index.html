@@ -319,6 +319,7 @@ svg.mol{width:100%;height:auto;display:block}
 .lab .istatus{margin-top:8px;font-size:.98rem;min-height:1.4em}.lab .istatus.ok{color:var(--mint-ink)}.lab .istatus.warn{color:var(--amber-ink)}
 @media(max-width:760px){.lab .wcount{margin-left:0;width:100%}.lab .ibar .btn{flex:1}}
 @media(max-width:760px){.lab svg.labmol{min-width:min(calc(var(--vbw) * 1.05px),980px)}.lab .bench::after{content:'Swipe sideways to see the whole chain →';display:block;font-size:.75rem;color:var(--faint);padding:2px 6px 0;position:sticky;left:0}}
+.choice .ctext{min-width:0}.choices.grid .choice .ctext{display:block;width:100%;overflow-x:auto}
 
 </style>
 <script src="https://itsdrdan.github.io/games/track.js" defer></script>
@@ -1675,7 +1676,7 @@ function newQuestion(focus) {
   $('unit').innerHTML = q.unit || '';
   const inp = $('answer'); inp.value = ''; inp.disabled = false; inp.placeholder = q.placeholder || 'Type your answer';
   inp.hidden = isAtom || isLab; $('unit').hidden = isAtom || isLab; $('checkBtn').textContent = 'Check';
-  if (isChoice) $('choices').innerHTML = q.choices.map((c, i) => `<button type="button" class="choice" data-choice="${i}">${q.grid || stripTags(c.html).length <= 2 ? '' : `<span class="letter">${'ABCDEF'[i]}</span>`}${scripts(c.html)}</button>`).join('');
+  if (isChoice) $('choices').innerHTML = q.choices.map((c, i) => `<button type="button" class="choice" data-choice="${i}">${q.grid || stripTags(c.html).length <= 2 ? '' : `<span class="letter">${'ABCDEF'[i]}</span>`}<span class="ctext">${scripts(c.html)}</span></button>`).join('');
   $('typingNote').innerHTML = isChoice || isLab ? '' : isAtom ? 'Tap a carbon (a corner or end of the zig-zag), then press Check.' : q.topic === 'names' ? 'Type it like <b>18:2</b>.' : 'Type a whole number.';
   $('feedback').className = 'feedback'; $('feedback').innerHTML = '';
   $('hintBox').hidden = true; $('nextBtn').hidden = true; $('solBtn').classList.remove('pulse');
@@ -1783,7 +1784,7 @@ function renderGuide() {
     const cls = i < q._g.at ? 'done' : i === q._g.at ? 'current' : 'later', right = s.choices ? s.choices.find(c => c.ok) : null;
     let body = '';
     if (!s.final && i < q._g.at) body = `<div class="gwhy"><b>${right.html}</b>. ${s.why || ''}</div>`;
-    else if (!s.final && i === q._g.at) body = `<div class="gchoices">${s.choices.map((c, k) => `<button type="button" class="choice" data-g="${i}" data-k="${k}">${c.html}</button>`).join('')}</div>${q._g.msg[i] ? `<div class="gwhy bad">${q._g.msg[i]}</div>` : ''}`;
+    else if (!s.final && i === q._g.at) body = `<div class="gchoices">${s.choices.map((c, k) => `<button type="button" class="choice" data-g="${i}" data-k="${k}"><span class="ctext">${c.html}</span></button>`).join('')}</div>${q._g.msg[i] ? `<div class="gwhy bad">${q._g.msg[i]}</div>` : ''}`;
     return `<div class="gstep ${cls}"><div class="gnum">Step ${i + 1} of ${q.steps.length}</div><div class="gask">${s.ask}</div>${body}</div>`;
   }).join(''));
 }
