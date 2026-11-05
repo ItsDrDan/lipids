@@ -1477,14 +1477,14 @@ function genLab() {
 let BANK = null, BANK_LOADING = null;
 function loadBank() {
   if (BANK || BANK_LOADING) return BANK_LOADING;
-  BANK_LOADING = fetch('https://itsdrdan.github.io/textbook/bank/lipids.json').then(r => r.json()).then(items => { BANK = items.filter(x => !x.cs && !x.s && !(x.f || []).some(g => g && g.type !== 'table')); return BANK; })   // only questions this page can show in full (no drawn structures or graphs).catch(() => { BANK = []; return BANK; });
+  BANK_LOADING = fetch('https://itsdrdan.github.io/textbook/bank/lipids.json').then(r => r.json()).then(items => { BANK = items.filter(x => !x.cs && !x.s && !(x.f || []).some(g => g && g.type !== 'table')); return BANK; }).catch(() => { BANK = []; return BANK; }); // only questions this page can show in full (no drawn structures or graphs)
   return BANK_LOADING;
 }
 const bankBag = { q: [], next() { if (!this.q.length) this.q = shuffle(BANK || []); return this.q.pop(); } };
 function tableHTML(f) { return `<table class="data">${f.head ? `<thead><tr>${f.head.map(h => `<th>${h}</th>`).join('')}</tr></thead>` : ''}<tbody>${f.rows.map(r => `<tr>${r.map(c => `<td>${c}</td>`).join('')}</tr>`).join('')}</tbody></table>${f.cap ? `<p class="note-small">${f.cap}</p>` : ''}`; }
 function genFinal() {
   if (!BANK || !BANK.length) return null;
-  const x = bankBag.next(), k = 0;   // in the Try It bank the correct answer is ALWAYS c[0]; x.k is the calculator flag, not the key
+  const x = bankBag.next(), k = 0; // in the bank the correct answer is always c[0]; x.k is the calculator flag, not the key
   const figs = Array.isArray(x.f) ? x.f.filter(f => f.type === 'table').map(tableHTML).join('') : '';
   return mcq({ topic: 'final', tag: 'Final Boss question', prompt: x.q, art: figs, right: x.c[k], wrong: x.c.filter((c, i) => i !== k).map(c => ({ html: c, why: '' })), hint: x.h, solution: x.w, flags: {}, bankId: x.id });
 }
