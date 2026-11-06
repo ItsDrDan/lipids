@@ -8,4 +8,4 @@ Study game for CHEM 3B lipids. Live at https://itsdrdan.github.io/lipids/
 - Links: `?topic=<id>` opens one topic (e.g. `?topic=omega`, `?topic=lab` for the hands-on build-and-break bench); the old `?mode=fa|bb|lip|mem|clin|exam` links from the textbook still work. `?course=3B` is accepted and ignored.
 - `meta.json` is the study hub card.
 
-Game design and chemistry by ItsDrDan. Code written with AI assistance (Claude) and checked by the author. CC BY-NC-SA 4.0.
+Game design and chemistry by ItsDrDan. Code written with AI assistance (Claude) and checked by the author. © ItsDrDan, all rights reserved; free to play, reuse by permission only (see LICENSE).
