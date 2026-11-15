@@ -1949,6 +1949,11 @@ const SUBS = '₀₁₂₃₄₅₆₇₈₉', SUPS = { '⁰': '0', '¹': '1', '
 function scripts(html) {
   return String(html).split(/(<svg[\s\S]*?<\/svg>)/).map((part, i) => i % 2 ? part : part.replace(/[₀-₉]+/g, m => `<sub>${[...m].map(c => SUBS.indexOf(c)).join('')}</sub>`).replace(/[⁰¹²³⁺⁻]+/g, m => `<sup>${[...m].map(c => SUPS[c]).join('')}</sup>`)).join('');
 }
+/* Inside a textbook box (iframe), a ?topic= link opens at the question, not the title banner (2026-11-14) */
+/* ?view=lab: compact view for a textbook box. Shows only the demo (and whatever it needs) plus a link to the full game,
+   so the box can stay short on a phone and the student can still scroll the textbook page around it (2026-11-14). */
+function ddLabView(keep){try{if(new URLSearchParams(location.search).get('view')!=='lab')return false;const ks=keep.map(k=>typeof k==='string'?document.getElementById(k):k).filter(Boolean);if(!ks.length)return false;const need=new Set();ks.forEach(k=>{for(let e=k;e&&e!==document.body;e=e.parentElement)need.add(e)});need.forEach(e=>{const p=e.parentElement;if(!p)return;[...p.children].forEach(c=>{if(need.has(c)||/^(SCRIPT|STYLE|DIALOG|CANVAS|TEMPLATE|LINK|NOSCRIPT)$/.test(c.tagName)||getComputedStyle(c).position==='fixed')return;c.setAttribute('data-dd-labhide','')})});const st=document.createElement('style');st.textContent='[data-dd-labhide]{display:none!important}.dd-labbar{display:flex;justify-content:flex-end;padding:4px 10px 0;font:600 14px/1.4 system-ui,-apple-system,sans-serif}.dd-labbar a{color:inherit;text-decoration:underline}';document.head.appendChild(st);document.documentElement.classList.add('dd-labview');const u=new URL(location.href);u.searchParams.delete('view');const bar=document.createElement('div');bar.className='dd-labbar';const a=document.createElement('a');a.href=u.href;a.target='_blank';a.rel='noopener';a.textContent='Open the full game ↗';bar.appendChild(a);document.body.insertBefore(bar,document.body.firstChild);window.scrollTo(0,0);return true}catch(e){return false}}
+function ddJumpTo(get){let moved=false;const stop=()=>{moved=true};['wheel','touchstart','keydown','pointerdown'].forEach(t=>addEventListener(t,stop,{once:true,passive:true}));const go=()=>{if(moved||document.documentElement.classList.contains('dd-labview'))return;const el=get();if(el)window.scrollTo({top:Math.max(0,el.getBoundingClientRect().top+window.scrollY-8),behavior:'instant'})};requestAnimationFrame(()=>requestAnimationFrame(go));if(document.readyState!=='complete')addEventListener('load',()=>setTimeout(go,50),{once:true});setTimeout(go,700)}
 function init() {
   load(); bind();
   // ?mode= links from the old Lipid Lab (the CHEM 3B textbook uses them) and ?topic=
@@ -1958,7 +1963,7 @@ function init() {
   renderStats(); renderChooser(); wireArt(); paintIcons(); setMood('idle');
   if (m === 'final') return startFinal();
   const c = CATEGORIES.find(x => x.id === m); if (c) { state.sel = new Set(c.topics); afterSelect(); return; }
-  if (tp && TOPICS[tp]) { state.sel = new Set([tp]); afterSelect(); return; }
+  if (tp && TOPICS[tp]) { state.sel = new Set([tp]); afterSelect(); if (window.parent !== window) ddJumpTo(() => $('play')); ddLabView(['play']); return; }
   state.sel.size ? newQuestion() : showEmpty();
 }
 if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init); else init();
